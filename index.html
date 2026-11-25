@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="nl-BE">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remediëringsplanner 3e graad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: rustig schoolinstrument, zakelijk en duidelijk
+   IDEA: het lesrooster aan de muur van het secretariaat
+   PICTURE: het rooster zelf: kolommen per lesuur met groepskaarten
+   COLOUR and TYPE: diepgroen, wit, limoenwit, koraal voor tekorten; Inter Tight + Inter
+   LAYOUT: groene kopband met tabs, daaronder één kolom met werkpanelen */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#0d1714);--ink:light-dark(#10201c,#e7efe9);--mut:light-dark(#5a6b66,#9fb2ab);
+--g:#00463c;--gl:light-dark(#e6f5c8,#1d3a2a);--line:light-dark(#dfe6e3,#24342f);--panel:light-dark(#f6f9f7,#13211d);
+--cor:#ff6f59;--corl:light-dark(#ffe7e2,#3b1f1a);--amb:light-dark(#fff3d6,#3a3119);--ok:light-dark(#e4f4ea,#173326)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:"Inter Tight",Inter,sans-serif;line-height:1.1;margin:0}
+h1{font-size:clamp(26px,4vw,40px);text-wrap:balance}h2{font-size:22px;margin-bottom:12px}h3{font-size:17px}
+header{background:var(--g);color:#fff;padding:24px max(5vw,16px) 0}
+header p{margin:6px 0 18px;color:#cfe5d9;max-width:70ch}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav a{color:#fff;text-decoration:none;padding:12px 18px;border-radius:10px 10px 0 0;font-weight:600;min-height:44px}
+nav a.on{background:var(--bg);color:var(--ink)}
+main{padding:24px max(5vw,16px) 60px;max-width:1240px;margin:0 auto}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:18px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+label{font-size:14px;color:var(--mut);display:block}
+input,select,textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;min-height:44px}
+textarea{width:100%;min-height:150px;line-height:1.4}
+input[type=checkbox]{min-height:auto;width:20px;height:20px;accent-color:var(--g);vertical-align:middle}
+button{font:inherit;font-weight:600;border:0;border-radius:8px;padding:10px 16px;min-height:44px;cursor:pointer;background:var(--g);color:#fff}
+button.sec{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button.warn{background:var(--cor);color:#2a0d07}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid #7fc8a9;outline-offset:2px}
+.mut{color:var(--mut);font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--gl);border-radius:20px;padding:3px 10px;font-size:14px}
+.studs{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:4px 12px;margin:10px 0}
+.studs label{color:var(--ink);font-size:15px;padding:6px 0;cursor:pointer}
+table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);vertical-align:top;font-size:15px}
+th{font-size:14px;color:var(--mut);font-weight:600}
+.scroll{overflow-x:auto}
+.banner{border-radius:12px;padding:16px 18px;margin-bottom:18px}
+.banner.ok{background:var(--ok)}.banner.voorstel{background:var(--amb)}.banner.fout,.banner.tekort{background:var(--corl)}
+.banner ul{margin:8px 0 0;padding-left:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.col{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.col>h3{background:var(--g);color:#fff;padding:12px 14px}
+.card{padding:10px 14px;border-bottom:1px solid var(--line)}
+.card.rem{border-left:5px solid var(--g)}.card.vs{border-left:5px solid #9cc7b7}
+.card.bad{background:var(--corl)}.card.ovr{background:var(--amb)}
+.card b{display:block}.card .lk{font-weight:600}
+details summary{cursor:pointer;font-size:14px;color:var(--mut)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;flex-wrap:wrap}
+.seg button{border-radius:0;background:transparent;color:var(--ink)}.seg button.on{background:var(--g);color:#fff}
+.tlist{display:grid;gap:10px}
+.tk{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,2fr) minmax(0,2fr) 110px 44px;gap:10px;align-items:start;border-bottom:1px solid var(--line);padding-bottom:10px}
+.tk .cbs{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:14px}
+.tk .cbs label{color:var(--ink);font-size:14px}
+.kl{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.note{font-size:13px;color:var(--mut);margin-top:30px}
+@media(max-width:800px){.tk{grid-template-columns:1fr}}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:8em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;white-space:normal;color:var(--mut)}.stack td:empty{display:none}}
+@media print{header nav,.noprint{display:none}header{background:none;color:#000;padding:0}main{padding:0}.col>h3{background:#ddd;color:#000}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header>
+  <h1>Remediëringsplanner 3e graad</h1>
+  <p id="sub">Demoversie met verzonnen leerkrachten, klassen en leerlingen.</p>
+  <nav id="nav">
+    <a href="#leerkracht" data-tab="leerkracht">Leerkracht</a>
+    <a href="#beheer" data-tab="beheer">Beheer</a>
+    <a href="#rooster" data-tab="rooster">Rooster</a>
+  </nav>
+</header>
+<main id="app"></main>
+<script>
+{
+const KEY='remplan-demo-v1';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const range=n=>[...Array(n).keys()];
+const uid=p=>p+Math.random().toString(36).slice(2,8);
+
+function demo(){
+  const kl={
+    '5WW':['Lars Van den Broeck','Emma Goossens','Noah Vermeulen','Lina De Wilde','Arthur Mertens','Julie Aerts','Finn Jacobs'],
+    '5BCW':['Nora Van Damme','Louis Smets','Marie Hendrickx','Jules Pauwels','Elise Lambrechts','Mats Verbruggen','Zoë Dierckx'],
+    '5MT':['Victor Coppens','Hanne Martens','Seppe Vos','Ella Van Hoof','Rune De Backer','Fien Segers','Milan Thys'],
+    '6WW':['Lukas Vandenberghe','Ines Bogaerts','Wout Michiels','Amber Wuyts','Kobe Van Aken','Lotte Geerts','Senne Leysen'],
+    '6BCW':['Febe Huybrechts','Jasper Daems','Anna Verlinden','Thibo Cools','Margot Vervoort','Robbe Nijs','Sara Op de Beeck']};
+  const leerlingen=[];for(const k in kl)kl[k].forEach(n=>leerlingen.push({id:k+'|'+n,naam:n,klas:k}));
+  const all=Object.keys(kl);
+  const L=(id,naam,vakken,klassen,lokaal,b)=>({id,naam,vakken,klassen,lokaal,besch:b});
+  const id=(k,n)=>k+'|'+n;
+  return {
+    moment:{naam:'Remediëringsmoment december',datum:'2026-12-09',lesuren:3},
+    vakken:['Wiskunde','Nederlands','Frans','Engels','Fysica'],
+    klassen:all,
+    lokalen:['A101','A102','A103','A104','A105','B201','B202','B203','B204','B205'],
+    leerlingen,
+    leerkrachten:[
+      L('t1','Mevr. Katrien Verhoeven',['Wiskunde'],['5WW','5BCW','6WW'],'A101',[1,1,1]),
+      L('t2','Dhr. Pieter Claes',['Wiskunde'],['5MT','6BCW'],'A102',[1,1,1]),
+      L('t3','Mevr. Sofie Janssens',['Nederlands'],['5WW','5BCW','5MT'],'A103',[1,1,1]),
+      L('t4','Dhr. Tom De Smet',['Nederlands'],['6WW','6BCW'],'A104',[1,0,1]),
+      L('t5','Mevr. Griet Hermans',['Frans'],all.slice(),'A105',[1,1,1]),
+      L('t6','Dhr. Bram Maes',['Engels'],all.slice(),'B201',[1,1,0]),
+      L('t7','Mevr. Hilde Peeters',['Fysica'],['5WW','5BCW','6WW'],'B202',[1,1,1]),
+      L('t8','Dhr. Koen Willems',['Fysica'],['5MT','6BCW'],'B203',[0,1,1])],
+    remediering:[
+      {id:'r1',lk:'t1',vak:'Wiskunde',onderwerp:'Goniometrie',uren:1,leerlingen:[id('5WW','Lars Van den Broeck'),id('5WW','Noah Vermeulen'),id('5WW','Julie Aerts')]},
+      {id:'r2',lk:'t1',vak:'Wiskunde',onderwerp:'Afgeleiden',uren:1,leerlingen:[id('6WW','Wout Michiels'),id('6WW','Kobe Van Aken')]},
+      {id:'r3',lk:'t2',vak:'Wiskunde',onderwerp:'Tweedegraadsfuncties',uren:2,leerlingen:[id('5MT','Victor Coppens'),id('5MT','Seppe Vos'),id('5MT','Rune De Backer')]},
+      {id:'r4',lk:'t3',vak:'Nederlands',onderwerp:'Argumenteren',uren:1,leerlingen:[id('5BCW','Nora Van Damme'),id('5BCW','Jules Pauwels')]},
+      {id:'r5',lk:'t5',vak:'Frans',onderwerp:'Passé composé',uren:1,leerlingen:[id('6BCW','Jasper Daems'),id('6BCW','Robbe Nijs'),id('5MT','Hanne Martens'),id('5MT','Seppe Vos')]}]
+  };
+}
+let S;try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S||!S.leerkrachten)S=demo();
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const tBy=()=>Object.fromEntries(S.leerkrachten.map(t=>[t.id,t]));
+const sBy=()=>Object.fromEntries(S.leerlingen.map(s=>[s.id,s]));
+const H=()=>S.moment.lesuren;
+function clean(){
+  const ids=new Set(S.leerlingen.map(s=>s.id)),ts=new Set(S.leerkrachten.map(t=>t.id));
+  S.remediering.forEach(r=>{r.leerlingen=r.leerlingen.filter(x=>ids.has(x));r.uren=Math.min(r.uren,H())});
+  S.remediering=S.remediering.filter(r=>ts.has(r.lk)&&r.leerlingen.length);
+  S.leerkrachten.forEach(t=>{t.vakken=t.vakken.filter(v=>S.vakken.includes(v));t.klassen=t.klassen.filter(k=>S.klassen.includes(k));if(!S.lokalen.includes(t.lokaal))t.lokaal='';while(t.besch.length<3)t.besch.push(1)});
+}
+
+/* ---------- planner ---------- */
+function hungarian(cost){
+  const n=cost.length,m=cost[0].length,INF=1e18,u=Array(n+1).fill(0),v=Array(m+1).fill(0),p=Array(m+1).fill(0),way=Array(m+1).fill(0);
+  for(let i=1;i<=n;i++){p[0]=i;let j0=0;const minv=Array(m+1).fill(INF),used=Array(m+1).fill(false);
+    do{used[j0]=true;const i0=p[j0];let delta=INF,j1=0;
+      for(let j=1;j<=m;j++)if(!used[j]){const cur=cost[i0-1][j-1]-u[i0]-v[j];if(cur<minv[j]){minv[j]=cur;way[j]=j0}if(minv[j]<delta){delta=minv[j];j1=j}}
+      for(let j=0;j<=m;j++){if(used[j]){u[p[j]]+=delta;v[j]-=delta}else minv[j]-=delta}
+      j0=j1}while(p[j0]!==0);
+    do{const j1=way[j0];p[j0]=p[j1];j0=j1}while(j0)}
+  const a=Array(n).fill(-1);for(let j=1;j<=m;j++)if(p[j])a[p[j]-1]=j-1;return a;
+}
+function plan(){
+  const nH=H(),T=S.leerkrachten,TB=tBy(),SB=sBy(),L=S.lokalen.length,errors=[];
+  const rems=S.remediering.filter(r=>TB[r.lk]&&r.leerlingen.length);
+  const ses=[];rems.forEach(r=>{for(let k=0;k<r.uren;k++)ses.push({r,lk:r.lk,st:r.leerlingen})});
+  const avail=t=>range(nH).filter(h=>t.besch[h]);
+  rems.forEach(r=>{const t=TB[r.lk],a=avail(t).length;
+    if(r.uren>a)errors.push(`${t.naam} vraagt ${r.uren} lesuur/lesuren voor ${r.vak} (${r.onderwerp||'zonder onderwerp'}), maar heeft maar ${a} lesuur/lesuren aangevinkt.`)});
+  T.forEach(t=>{const n=ses.filter(s=>s.lk===t.id).length,a=avail(t).length;
+    if(n>a&&!errors.some(e=>e.startsWith(t.naam)))errors.push(`${t.naam} heeft samen ${n} lesuren remediëring, maar maar ${a} lesuur/lesuren aangevinkt.`)});
+  const cnt={};ses.forEach(s=>s.st.forEach(x=>cnt[x]=(cnt[x]||0)+1));
+  for(const x in cnt)if(cnt[x]>nH)errors.push(`${SB[x].naam} (${SB[x].klas}) zit in ${cnt[x]} lesuren remediëring, maar er zijn maar ${nH} lesuren.`);
+  if(errors.length)return{status:'fout',errors};
+  const N=ses.length,dom=ses.map(s=>avail(TB[s.lk]));
+  const order=range(N).sort((a,b)=>dom[a].length-dom[b].length||ses[b].st.length-ses[a].st.length);
+  const tBusy=range(nH).map(()=>new Set()),sBusy=range(nH).map(()=>new Set()),c=Array(nH).fill(0),asg=Array(N);
+  const klStud=Object.fromEntries(S.klassen.map(k=>[k,S.leerlingen.filter(s=>s.klas===k).map(s=>s.id)]));
+  const need=h=>{const groups=S.klassen.filter(k=>klStud[k].some(x=>!sBusy[h].has(x)));
+    const tick=T.filter(t=>t.besch[h]&&!tBusy[h].has(t.id)).length,unt=T.filter(t=>!t.besch[h]&&!tBusy[h].has(t.id)).length;
+    const s0=Math.max(0,groups.length-tick),over=Math.min(s0,unt);
+    return{groups,short:s0-over,over,roomShort:Math.max(0,c[h]+groups.length-L)}};
+  const lb=(()=>{let q=Math.floor(N/nH),r=N%nH;return r*(q+1)**2+(nH-r)*q*q})();
+  let best=null,bestCost=Infinity,steps=0,done=false;
+  const rec=i=>{if(done||steps++>200000)return;
+    if(i===N){let cost=0;for(let h=0;h<nH;h++){const x=need(h);cost+=1e6*(x.short+x.roomShort)+1e3*x.over+c[h]**2}
+      if(cost<bestCost){bestCost=cost;best=asg.slice();if(cost===lb)done=true}return}
+    const si=order[i],s=ses[si];
+    for(const h of dom[si]){if(tBusy[h].has(s.lk)||s.st.some(x=>sBusy[h].has(x)))continue;
+      asg[si]=h;tBusy[h].add(s.lk);s.st.forEach(x=>sBusy[h].add(x));c[h]++;
+      rec(i+1);
+      tBusy[h].delete(s.lk);s.st.forEach(x=>sBusy[h].delete(x));c[h]--}};
+  rec(0);
+  if(!best)return{status:'fout',errors:['Er bestaat geen verdeling waarbij geen enkele leerling of leerkracht op hetzelfde lesuur op twee plaatsen moet zijn. Verminder het aantal lesuren of spreid de remediëringen.']};
+  range(nH).forEach(h=>{tBusy[h].clear();sBusy[h].clear();c[h]=0});
+  best.forEach((h,i)=>{tBusy[h].add(ses[i].lk);ses[i].st.forEach(x=>sBusy[h].add(x));c[h]++});
+  const load=Object.fromEntries(T.map(t=>[t.id,0]));ses.forEach(s=>load[s.lk]++);
+  const hours=[],overrules=[],problems=[];let status='ok';
+  for(let h=0;h<nH;h++){
+    const items=ses.map((s,i)=>best[i]===h?{type:'rem',lk:s.lk,vak:s.r.vak,onderwerp:s.r.onderwerp,st:s.st,lokaal:null}:null).filter(Boolean);
+    const groups=S.klassen.map(k=>({k,st:klStud[k].filter(x=>!sBusy[h].has(x))})).filter(g=>g.st.length);
+    const cands=T.filter(t=>!tBusy[h].has(t.id));
+    groups.sort((a,b)=>b.st.length-a.st.length);
+    const take=groups.slice(0,cands.length);
+    if(take.length){
+      const cost=take.map(g=>cands.map(t=>(t.besch[h]?0:1000)+(t.klassen.includes(g.k)?0:20)+load[t.id]*5));
+      const a=hungarian(cost);
+      take.forEach((g,i)=>{const t=cands[a[i]];g.lk=t.id;load[t.id]++;if(!t.besch[h]){g.ovr=true;overrules.push({t:t.id,h,k:g.k})}})}
+    groups.forEach(g=>items.push({type:'vs',lk:g.lk||null,klas:g.k,st:g.st,ovr:!!g.ovr,lokaal:null}));
+    const used=new Set(),own=it=>it.lk&&TB[it.lk].lokaal;
+    items.filter(i=>i.type==='rem').forEach(i=>{if(own(i)&&!used.has(own(i))){i.lokaal=own(i);used.add(i.lokaal)}});
+    items.filter(i=>i.type==='vs').forEach(i=>{if(own(i)&&!used.has(own(i))){i.lokaal=own(i);used.add(i.lokaal)}});
+    items.filter(i=>!i.lokaal).forEach(i=>{const f=S.lokalen.find(l=>!used.has(l));if(f){i.lokaal=f;used.add(f)}});
+    const usedT=new Set(items.map(i=>i.lk));
+    const vrij=T.filter(t=>t.besch[h]&&!usedT.has(t.id)).map(t=>t.id);
+    const noT=items.filter(i=>!i.lk).length,noL=items.filter(i=>!i.lokaal).length;
+    if(noT)problems.push(`Lesuur ${h+1}: ${items.filter(i=>i.type==='rem').length} remediëring(en) en ${groups.length} klas(sen) in vrije studie, maar er zijn maar ${cands.length} leerkrachten vrij voor toezicht: ${noT} leerkracht(en) te kort voor vrije studie.`);
+    if(noL)problems.push(`Lesuur ${h+1}: ${noL} lokaal/lokalen te kort (${items.length} groepen, ${L} lokalen).`);
+    hours.push({h,items,vrij});
+  }
+  if(problems.length)status='tekort';else if(overrules.length)status='voorstel';
+  return{status,hours,overrules,problems};
+}
+
+/* ---------- views ---------- */
+let tab='leerkracht',me=S.leerkrachten[0]?.id,form=null,view='uur',armed=null,ioText='';
+const newForm=()=>({id:null,vak:(tBy()[me]?.vakken[0])||S.vakken[0],klas:(tBy()[me]?.klassen[0])||S.klassen[0],sel:new Set(),uren:1,onderwerp:''});
+const app=document.getElementById('app');
+const lesuurCbs=(t,scope)=>range(H()).map(h=>`<label style="display:inline-block;margin-right:14px;color:var(--ink)"><input type="checkbox" data-ch="besch" data-t="${esc(t.id)}" data-h="${h}" ${t.besch[h]?'checked':''}> Lesuur ${h+1}</label>`).join('');
+
+function vLeerkracht(){
+  const TB=tBy(),t=TB[me];
+  if(!t)return`<div class="panel">Er zijn nog geen leerkrachten. Voeg ze toe in Beheer.</div>`;
+  if(!form)form=newForm();
+  const SB=sBy(),mine=S.remediering.filter(r=>r.lk===me);
+  const studs=S.leerlingen.filter(s=>s.klas===form.klas);
+  const vakOpts=[...t.vakken,...S.vakken.filter(v=>!t.vakken.includes(v))];
+  const klOpts=[...t.klassen,...S.klassen.filter(k=>!t.klassen.includes(k))];
+  return`
+  <div class="panel row"><div><label for="me">Aangemeld als (demo: kies een leerkracht)</label>
+    <select id="me" data-ch="me">${S.leerkrachten.map(x=>`<option value="${esc(x.id)}" ${x.id===me?'selected':''}>${esc(x.naam)}</option>`).join('')}</select></div>
+    <p class="mut" style="margin:0 0 10px">${esc(S.moment.naam)} · ${esc(S.moment.datum)} · ${H()} lesuren</p></div>
+  <div class="panel"><h2>1. Mijn beschikbaarheid</h2>
+    <p class="mut">Vink de lesuren aan waarop je aanwezig bent. Ook zonder eigen remediëring kan je dan toezicht houden in de vrije studie.</p>${lesuurCbs(t)}</div>
+  <div class="panel"><h2>2. ${form.id?'Remediëring bewerken':'Nieuwe remediëring'}</h2>
+    <div class="row">
+      <div><label for="f-vak">Vak</label><select id="f-vak" data-ch="f-vak">${vakOpts.map(v=>`<option ${v===form.vak?'selected':''}>${esc(v)}</option>`).join('')}</select></div>
+      <div><label for="f-ond">Onderwerp</label><input id="f-ond" data-ch="f-ond" value="${esc(form.onderwerp)}" placeholder="bv. vectoren"></div>
+      <div><label for="f-uren">Aantal lesuren</label><select id="f-uren" data-ch="f-uren">${range(H()).map(i=>`<option value="${i+1}" ${form.uren===i+1?'selected':''}>${i+1}</option>`).join('')}</select></div>
+      <div><label for="f-klas">Klaslijst</label><select id="f-klas" data-ch="f-klas">${klOpts.map(k=>`<option ${k===form.klas?'selected':''}>${esc(k)}</option>`).join('')}</select></div>
+    </div>
+    <div class="studs">${studs.map(s=>`<label><input type="checkbox" data-ch="f-st" value="${esc(s.id)}" ${form.sel.has(s.id)?'checked':''}> ${esc(s.naam)}</label>`).join('')||'<span class="mut">Deze klas heeft nog geen leerlingen.</span>'}</div>
+    <p class="mut" style="margin:4px 0">Geselecteerd (${form.sel.size}) – je kan ook leerlingen uit andere klassen toevoegen door de klaslijst te wisselen:</p>
+    <div class="chips" style="margin-bottom:12px">${[...form.sel].map(x=>`<span class="chip">${esc(SB[x]?.naam)} · ${esc(SB[x]?.klas)}</span>`).join('')||'<span class="mut">nog niemand</span>'}</div>
+    <div class="row"><button data-act="f-save">${form.id?'Wijzigingen opslaan':'Remediëring opslaan'}</button>${form.id?'<button class="sec" data-act="f-cancel">Annuleren</button>':''}</div>
+  </div>
+  <div class="panel"><h2>Mijn remediëringen</h2>
+    ${mine.length?`<table class="stack"><thead><tr><th>Vak</th><th>Onderwerp</th><th>Lesuren</th><th>Leerlingen</th><th></th></tr></thead><tbody>
+    ${mine.map(r=>`<tr><td>${esc(r.vak)}</td><td>${esc(r.onderwerp)}</td><td>${r.uren}</td><td>${r.leerlingen.map(x=>esc(SB[x]?.naam)+' ('+esc(SB[x]?.klas)+')').join(', ')}</td>
+    <td style="white-space:nowrap"><button class="sec" data-act="r-edit" data-id="${esc(r.id)}">Bewerken</button> <button class="sec" data-act="r-del" data-id="${esc(r.id)}">${armed==='r-del'+r.id?'Zeker?':'Verwijderen'}</button></td></tr>`).join('')}</tbody></table>`:'<p class="mut">Nog geen remediëringen voor dit moment.</p>'}
+  </div>`;
+}
+
+function vBeheer(){
+  const n=H();
+  return`
+  <div class="panel"><h2>Remediëringsmoment</h2><div class="row">
+    <div><label for="m-naam">Naam</label><input id="m-naam" data-ch="m-naam" value="${esc(S.moment.naam)}"></div>
+    <div><label for="m-datum">Datum</label><input id="m-datum" type="date" data-ch="m-datum" value="${esc(S.moment.datum)}"></div>
+    <div><label for="m-uren">Aantal lesuren</label><select id="m-uren" data-ch="m-uren">${[1,2,3].map(i=>`<option ${i===n?'selected':''}>${i}</option>`).join('')}</select></div></div></div>
+  <div class="panel"><h2>Beschikbaarheid van alle leerkrachten</h2><p class="mut">Als beheerder kan je dit aanvullen voor wie het zelf niet invulde.</p>
+    <div class="scroll"><table><thead><tr><th>Leerkracht</th>${range(n).map(h=>`<th>Lesuur ${h+1}</th>`).join('')}<th>Remediëringen</th></tr></thead><tbody>
+    ${S.leerkrachten.map(t=>`<tr><td>${esc(t.naam)}</td>${range(n).map(h=>`<td><input type="checkbox" aria-label="${esc(t.naam)} lesuur ${h+1}" data-ch="besch" data-t="${esc(t.id)}" data-h="${h}" ${t.besch[h]?'checked':''}></td>`).join('')}<td>${S.remediering.filter(r=>r.lk===t.id).reduce((a,r)=>a+r.uren,0)} lesuur/lesuren</td></tr>`).join('')}
+    </tbody></table></div></div>
+  <div class="panel"><h2>Leerkrachten (${S.leerkrachten.length})</h2>
+    <div class="tlist">${S.leerkrachten.map(t=>`<div class="tk">
+      <div><label>Naam</label><input data-ch="t-naam" data-t="${esc(t.id)}" value="${esc(t.naam)}" style="width:100%"></div>
+      <div><label>Vakken</label><div class="cbs">${S.vakken.map(v=>`<label><input type="checkbox" data-ch="t-vak" data-t="${esc(t.id)}" value="${esc(v)}" ${t.vakken.includes(v)?'checked':''}> ${esc(v)}</label>`).join('')}</div></div>
+      <div><label>Geeft les aan</label><div class="cbs">${S.klassen.map(k=>`<label><input type="checkbox" data-ch="t-klas" data-t="${esc(t.id)}" value="${esc(k)}" ${t.klassen.includes(k)?'checked':''}> ${esc(k)}</label>`).join('')}</div></div>
+      <div><label>Eigen lokaal</label><select data-ch="t-lok" data-t="${esc(t.id)}" style="width:100%"><option value="">geen</option>${S.lokalen.map(l=>`<option ${l===t.lokaal?'selected':''}>${esc(l)}</option>`).join('')}</select></div>
+      <div><label>&nbsp;</label><button class="sec" aria-label="Verwijder ${esc(t.naam)}" data-act="t-del" data-t="${esc(t.id)}">${armed==='t-del'+t.id?'?':'✕'}</button></div></div>`).join('')}</div>
+    <div class="row" style="margin-top:12px"><input id="t-new" placeholder="Naam nieuwe leerkracht"><button data-act="t-add">Leerkracht toevoegen</button></div></div>
+  <div class="panel"><h2>Klassen en leerlingen</h2><p class="mut">Eén leerling per lijn. Later kan je hier de klaslijsten uit Smartschool plakken.</p>
+    <div class="kl">${S.klassen.map(k=>`<div><div class="row" style="justify-content:space-between;align-items:center"><h3>${esc(k)}</h3><button class="sec" data-act="k-del" data-k="${esc(k)}">${armed==='k-del'+k?'Zeker?':'Klas verwijderen'}</button></div>
+      <textarea data-ch="k-ll" data-k="${esc(k)}" aria-label="Leerlingen ${esc(k)}">${esc(S.leerlingen.filter(s=>s.klas===k).map(s=>s.naam).join('\n'))}</textarea></div>`).join('')}</div>
+    <div class="row" style="margin-top:12px"><input id="k-new" placeholder="bv. 6MT"><button data-act="k-add">Klas toevoegen</button></div></div>
+  <div class="grid">
+    <div class="panel"><h2>Lokalen (${S.lokalen.length})</h2><textarea data-ch="lok" aria-label="Lokalen">${esc(S.lokalen.join('\n'))}</textarea></div>
+    <div class="panel"><h2>Vakken (${S.vakken.length})</h2><textarea data-ch="vak" aria-label="Vakken">${esc(S.vakken.join('\n'))}</textarea></div></div>
+  <div class="panel"><h2>Gegevens</h2><div class="row">
+    <button class="sec" data-act="io-exp">Gegevens tonen om te kopiëren</button>
+    <button class="sec" data-act="io-imp">Geplakte gegevens inladen</button>
+    <button class="sec" data-act="rem-clear">${armed==='rem-clear'?'Zeker? Klik nogmaals':'Alle remediëringen wissen (nieuw moment)'}</button>
+    <button class="warn" data-act="demo">${armed==='demo'?'Zeker? Klik nogmaals':'Demo herstellen'}</button></div>
+    <textarea id="io" style="margin-top:12px" placeholder="Hier verschijnen de gegevens (JSON), of plak je ze om in te laden.">${esc(ioText)}</textarea></div>`;
+}
+
+function vRooster(){
+  const P=plan(),TB=tBy(),SB=sBy(),nm=id=>id?esc(TB[id]?.naam):'<b style="color:var(--cor)">GEEN LEERKRACHT</b>',lok=l=>l?esc(l):'<b style="color:var(--cor)">GEEN LOKAAL</b>';
+  const titles={ok:'Het rooster is rond',voorstel:'Voorstel: het lukt mits enkele extra toezichten',tekort:'Het lukt niet volledig',fout:'Het rooster lukt niet'};
+  let b=`<div class="banner ${P.status}"><h2 style="margin:0">${titles[P.status]}</h2>`;
+  if(P.status==='ok')b+=`<p style="margin:6px 0 0">Alle remediëringen zijn ingepland, elke klas in vrije studie heeft een leerkracht en een lokaal, en niemand moet een lesuur werken dat hij of zij niet aanvinkte.</p>`;
+  if(P.status==='fout')b+=`<ul>${P.errors.map(e=>`<li>${esc(e)}</li>`).join('')}</ul>`;
+  if(P.status==='tekort')b+=`<ul>${P.problems.map(e=>`<li>${esc(e)}</li>`).join('')}</ul><p style="margin:8px 0 0">Mogelijke oplossingen: extra leerkrachten beschikbaar zetten, leerkrachten toevoegen, of minder lesuren remediëring op hetzelfde moment.</p>`;
+  if(P.status!=='fout'&&P.overrules.length)b+=`<p style="margin:8px 0 4px">Volgende leerkrachten hebben dit lesuur <b>niet</b> aangevinkt, maar zijn nodig voor toezicht:</p><ul>${P.overrules.map(o=>`<li>${esc(TB[o.t].naam)}: lesuur ${o.h+1}, vrije studie ${esc(o.k)}</li>`).join('')}</ul><button class="noprint" data-act="accept" style="margin-top:10px">Voorstel aanvaarden (beschikbaarheid aanpassen)</button>`;
+  b+='</div>';
+  if(P.status==='fout')return b;
+  const seg=`<div class="seg noprint" role="group" aria-label="Weergave">${[['uur','Per lesuur'],['lk','Per leerkracht'],['ll','Per leerling']].map(([k,l])=>`<button class="${view===k?'on':''}" data-act="view" data-v="${k}">${l}</button>`).join('')}</div>`;
+  let body='';
+  if(view==='uur')body=`<div class="grid">${P.hours.map(x=>`<div class="col"><h3>Lesuur ${x.h+1}</h3>
+    ${x.items.map(i=>`<div class="card ${i.type} ${(!i.lk||!i.lokaal)?'bad':i.ovr?'ovr':''}">
+      <b>${i.type==='rem'?'Remediëring '+esc(i.vak):'Vrije studie '+esc(i.klas)}</b>
+      <span class="mut">${i.type==='rem'?esc(i.onderwerp||''):'klas blijft samen'} · lokaal ${lok(i.lokaal)}</span><br><span class="lk">${nm(i.lk)}</span>${i.ovr?' <span class="mut">(niet aangevinkt)</span>':''}
+      <details><summary>${i.st.length} leerling(en)</summary>${i.st.map(s=>esc(SB[s].naam)+(i.type==='rem'?' ('+esc(SB[s].klas)+')':'')).join('<br>')}</details></div>`).join('')}
+    <div class="card mut">Beschikbaar maar niet ingezet: ${x.vrij.map(id=>esc(TB[id].naam)).join(', ')||'niemand'}</div></div>`).join('')}</div>`;
+  if(view==='lk')body=`<div class="scroll"><table class="stack"><thead><tr><th>Leerkracht</th>${P.hours.map(x=>`<th>Lesuur ${x.h+1}</th>`).join('')}</tr></thead><tbody>
+    ${S.leerkrachten.map(t=>`<tr><td><b>${esc(t.naam)}</b></td>${P.hours.map(x=>{const i=x.items.find(i=>i.lk===t.id);
+      return`<td>${i?(i.type==='rem'?`Remediëring ${esc(i.vak)}`:`Toezicht vrije studie ${esc(i.klas)}`)+` · ${lok(i.lokaal)}${i.ovr?' <span class="mut">(niet aangevinkt)</span>':''}`:t.besch[x.h]?'<span class="mut">reserve</span>':'<span class="mut">afwezig</span>'}</td>`}).join('')}</tr>`).join('')}</tbody></table></div>`;
+  if(view==='ll')body=S.klassen.map(k=>`<h3 style="margin:18px 0 6px">${esc(k)}</h3><div class="scroll"><table class="stack"><thead><tr><th>Leerling</th>${P.hours.map(x=>`<th>Lesuur ${x.h+1}</th>`).join('')}</tr></thead><tbody>
+    ${S.leerlingen.filter(s=>s.klas===k).map(s=>`<tr><td>${esc(s.naam)}</td>${P.hours.map(x=>{const i=x.items.find(i=>i.st.includes(s.id));
+      return`<td>${i?(i.type==='rem'?`<b>Remediëring ${esc(i.vak)}</b>`:'Vrije studie')+` · ${lok(i.lokaal)} · ${nm(i.lk)}`:''}</td>`}).join('')}</tr>`).join('')}</tbody></table></div>`).join('');
+  return b+`<div class="row" style="justify-content:space-between;margin-bottom:14px"><h2 style="margin:0">${esc(S.moment.naam)} · ${esc(S.moment.datum)}</h2>${seg}</div>`+body;
+}
+
+function render(){
+  document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.tab===tab));
+  app.innerHTML=tab==='beheer'?vBeheer():tab==='rooster'?vRooster():vLeerkracht();
+  app.insertAdjacentHTML('beforeend','<p class="note">Demo: de gegevens worden enkel in deze browser bewaard. In de echte versie komen ze in een eigen Supabase-databank met aanmelding per leerkracht.</p>');
+}
+const route=()=>{const h=location.hash.slice(1);tab=['leerkracht','beheer','rooster'].includes(h)?h:'leerkracht';armed=null;render()};
+window.addEventListener('hashchange',route);
+
+const lines=v=>[...new Set(v.split('\n').map(x=>x.trim()).filter(Boolean))];
+app.addEventListener('change',e=>{
+  const el=e.target,ch=el.dataset.ch;if(!ch)return;const t=tBy()[el.dataset.t];
+  switch(ch){
+    case'me':me=el.value;form=newForm();break;
+    case'besch':t.besch[+el.dataset.h]=el.checked?1:0;break;
+    case'f-vak':form.vak=el.value;break;case'f-ond':form.onderwerp=el.value;break;
+    case'f-uren':form.uren=+el.value;break;case'f-klas':form.klas=el.value;break;
+    case'f-st':el.checked?form.sel.add(el.value):form.sel.delete(el.value);break;
+    case'm-naam':S.moment.naam=el.value;break;case'm-datum':S.moment.datum=el.value;break;
+    case'm-uren':S.moment.lesuren=+el.value;clean();break;
+    case't-naam':t.naam=el.value.trim()||t.naam;break;
+    case't-vak':t.vakken=el.checked?[...t.vakken,el.value]:t.vakken.filter(v=>v!==el.value);break;
+    case't-klas':t.klassen=el.checked?[...t.klassen,el.value]:t.klassen.filter(v=>v!==el.value);break;
+    case't-lok':t.lokaal=el.value;break;
+    case'k-ll':{const k=el.dataset.k;S.leerlingen=S.leerlingen.filter(s=>s.klas!==k).concat(lines(el.value).map(n=>({id:k+'|'+n,naam:n,klas:k})));clean();break}
+    case'lok':S.lokalen=lines(el.value);clean();break;
+    case'vak':S.vakken=lines(el.value);clean();break;
+  }
+  save();if(!['f-ond'].includes(ch))render();
+});
+app.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]');if(!el)return;const a=el.dataset.act;
+  const twice=key=>{if(armed===key){armed=null;return true}armed=key;render();return false};
+  if(a==='f-save'){
+    if(!form.sel.size){el.textContent='Kies eerst leerlingen';return}
+    const r={id:form.id||uid('r'),lk:me,vak:form.vak,onderwerp:form.onderwerp.trim(),uren:form.uren,leerlingen:[...form.sel]};
+    S.remediering=S.remediering.filter(x=>x.id!==r.id).concat(r);form=newForm();}
+  if(a==='f-cancel')form=newForm();
+  if(a==='r-edit'){const r=S.remediering.find(x=>x.id===el.dataset.id);form={id:r.id,vak:r.vak,klas:tBy()[me].klassen[0]||S.klassen[0],sel:new Set(r.leerlingen),uren:r.uren,onderwerp:r.onderwerp||''};const f=S.leerlingen.find(s=>s.id===r.leerlingen[0]);if(f)form.klas=f.klas}
+  if(a==='r-del'){if(!twice('r-del'+el.dataset.id))return;S.remediering=S.remediering.filter(x=>x.id!==el.dataset.id)}
+  if(a==='t-add'){const n=document.getElementById('t-new').value.trim();if(!n)return;S.leerkrachten.push({id:uid('t'),naam:n,vakken:[],klassen:[],lokaal:'',besch:[1,1,1]})}
+  if(a==='t-del'){if(!twice('t-del'+el.dataset.t))return;S.leerkrachten=S.leerkrachten.filter(t=>t.id!==el.dataset.t);clean();if(me===el.dataset.t){me=S.leerkrachten[0]?.id;form=null}}
+  if(a==='k-add'){const n=document.getElementById('k-new').value.trim();if(!n||S.klassen.includes(n))return;S.klassen.push(n)}
+  if(a==='k-del'){if(!twice('k-del'+el.dataset.k))return;const k=el.dataset.k;S.klassen=S.klassen.filter(x=>x!==k);S.leerlingen=S.leerlingen.filter(s=>s.klas!==k);clean()}
+  if(a==='io-exp')ioText=JSON.stringify(S,null,1);
+  if(a==='io-imp'){try{const x=JSON.parse(document.getElementById('io').value);if(!x.leerkrachten||!x.leerlingen)throw 0;S=x;clean();ioText='';form=null;me=S.leerkrachten[0]?.id}catch(err){ioText='Dit zijn geen geldige gegevens.'}}
+  if(a==='rem-clear'){if(!twice('rem-clear'))return;S.remediering=[];form=null}
+  if(a==='demo'){if(!twice('demo'))return;S=demo();form=null;me='t1'}
+  if(a==='accept'){const P=plan();(P.overrules||[]).forEach(o=>{const t=tBy()[o.t];if(t)t.besch[o.h]=1})}
+  if(a==='view')view=el.dataset.v;
+  armed=null;save();render();
+});
+route();
+}
+</script>
+</body>
+</html>
