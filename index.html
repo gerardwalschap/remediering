@@ -4,76 +4,83 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Remediëringsplanner 3e graad</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-/* VOICE: rustig schoolinstrument, zakelijk en duidelijk
-   IDEA: het lesrooster aan de muur van het secretariaat
-   PICTURE: het rooster zelf: kolommen per lesuur met groepskaarten
-   COLOUR and TYPE: diepgroen, wit, limoenwit, koraal voor tekorten; Inter Tight + Inter
-   LAYOUT: groene kopband met tabs, daaronder één kolom met werkpanelen */
-:root{color-scheme:light dark;
---bg:light-dark(#ffffff,#0d1714);--ink:light-dark(#10201c,#e7efe9);--mut:light-dark(#5a6b66,#9fb2ab);
---g:#00463c;--gl:light-dark(#e6f5c8,#1d3a2a);--line:light-dark(#dfe6e3,#24342f);--panel:light-dark(#f6f9f7,#13211d);
---cor:#ff6f59;--corl:light-dark(#ffe7e2,#3b1f1a);--amb:light-dark(#fff3d6,#3a3119);--ok:light-dark(#e4f4ea,#173326)}
-:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+/* Huisstijl De Resonant, gelijk aan het leerpadenplatform:
+   blauwe kopbalk met schoollogo in wit kader + oranje streep, Verdana, witte kaarten op lichtgrijs */
+:root{color-scheme:light;
+--g:#1c4e8a;--gl:#e8f0fa;--or:#e8772e;--orl:#fdf0e6;
+--bg:#ffffff;--achter:#f4f6f9;--ink:#1f2733;--mut:#6b7280;--line:#d9dee6;--panel:#ffffff;
+--cor:#b83a2e;--corl:#fbeae8;--amb:#fdf0e6;--ok:#e6f4ec;
+--schaduw:0 1px 3px rgba(20,40,70,.08),0 4px 14px rgba(20,40,70,.06)}
 *{box-sizing:border-box;min-width:0}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
-h1,h2,h3{font-family:"Inter Tight",Inter,sans-serif;line-height:1.1;margin:0}
-h1{font-size:clamp(26px,4vw,40px);text-wrap:balance}h2{font-size:22px;margin-bottom:12px}h3{font-size:17px}
-header{background:var(--g);color:#fff;padding:24px max(5vw,16px) 0}
-header p{margin:6px 0 18px;color:#cfe5d9;max-width:70ch}
+body{margin:0;background:var(--achter);color:var(--ink);font:15px/1.6 Verdana,Geneva,sans-serif;overflow-x:clip}
+h1,h2,h3{line-height:1.2;margin:0}
+h2{font-size:18px;margin-bottom:12px;color:var(--g)}h3{font-size:16px;color:var(--g)}
+header{background:var(--g);color:#fff;padding:12px max(4vw,16px) 0}
+.balk{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-bottom:12px}
+.schoollogo{background:#fff url(logo-deresonant.png) no-repeat center/contain;background-origin:content-box;padding:5px 10px;box-sizing:content-box;width:145px;height:30px;border-radius:8px;flex:none}
+.streep{width:6px;align-self:stretch;background:var(--or);border-radius:3px}
+.titel{font-weight:bold;font-size:17px;letter-spacing:.2px}
+.titel small{display:block;font-weight:normal;font-size:12px;opacity:.85}
 nav{display:flex;gap:4px;flex-wrap:wrap}
-nav a{color:#fff;text-decoration:none;padding:12px 18px;border-radius:10px 10px 0 0;font-weight:600;min-height:44px}
-nav a.on{background:var(--bg);color:var(--ink)}
-main{padding:24px max(5vw,16px) 60px;max-width:1240px;margin:0 auto}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:18px}
+nav a{color:#fff;text-decoration:none;padding:10px 18px;border-radius:10px 10px 0 0;font-weight:bold;font-size:14px;min-height:44px;display:flex;align-items:center;border-top:3px solid transparent}
+nav a:hover{background:rgba(255,255,255,.1)}
+nav a.on{background:var(--achter);color:var(--g);border-top-color:var(--or)}
+main{padding:20px max(4vw,16px) 60px;max-width:1240px;margin:0 auto}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:var(--schaduw)}
 .row{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
-label{font-size:14px;color:var(--mut);display:block}
-input,select,textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;min-height:44px}
+label{font-size:13px;color:var(--mut);display:block}
+input,select,textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:42px}
 textarea{width:100%;min-height:150px;line-height:1.4}
-input[type=checkbox]{min-height:auto;width:20px;height:20px;accent-color:var(--g);vertical-align:middle}
-button{font:inherit;font-weight:600;border:0;border-radius:8px;padding:10px 16px;min-height:44px;cursor:pointer;background:var(--g);color:#fff}
-button.sec{background:transparent;color:var(--ink);border:1px solid var(--line)}
-button.warn{background:var(--cor);color:#2a0d07}
-button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid #7fc8a9;outline-offset:2px}
-.mut{color:var(--mut);font-size:14px}
+input[type=checkbox]{min-height:auto;width:18px;height:18px;accent-color:var(--g);vertical-align:middle}
+button{font:inherit;font-size:14px;border:1px solid var(--g);border-radius:8px;padding:9px 16px;min-height:42px;cursor:pointer;background:var(--g);color:#fff}
+button:hover{filter:brightness(1.08)}
+button.sec{background:transparent;color:var(--g);border-color:var(--g)}
+button.sec:hover{background:var(--gl);filter:none}
+button.warn{background:var(--cor);border-color:var(--cor);color:#fff}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid var(--or);outline-offset:2px}
+.mut{color:var(--mut);font-size:13px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{background:var(--gl);border-radius:20px;padding:3px 10px;font-size:14px}
-.studs{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:4px 12px;margin:10px 0}
-.studs label{color:var(--ink);font-size:15px;padding:6px 0;cursor:pointer}
-table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);vertical-align:top;font-size:15px}
-th{font-size:14px;color:var(--mut);font-weight:600}
+.chip{background:var(--gl);border:1px solid #c9d8ec;border-radius:999px;padding:3px 11px;font-size:13px}
+.studs{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px 12px;margin:10px 0}
+.studs label{color:var(--ink);font-size:14px;padding:6px 0;cursor:pointer}
+table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);vertical-align:top;font-size:14px}
+th{font-size:13px;color:var(--g);font-weight:bold;background:var(--gl)}
 .scroll{overflow-x:auto}
-.banner{border-radius:12px;padding:16px 18px;margin-bottom:18px}
-.banner.ok{background:var(--ok)}.banner.voorstel{background:var(--amb)}.banner.fout,.banner.tekort{background:var(--corl)}
+.banner{border-radius:12px;padding:16px 18px;margin-bottom:16px;border:1px solid var(--line);border-left:6px solid var(--g)}
+.banner.ok{background:var(--ok);border-left-color:#2e7d4f}.banner.voorstel{background:var(--amb);border-left-color:var(--or)}.banner.fout,.banner.tekort{background:var(--corl);border-left-color:var(--cor)}
+.banner h2{color:var(--ink)}
 .banner ul{margin:8px 0 0;padding-left:20px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
-.col{border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.col>h3{background:var(--g);color:#fff;padding:12px 14px}
+.col{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel);box-shadow:var(--schaduw)}
+.col>h3{background:var(--g);color:#fff;padding:11px 14px;border-bottom:3px solid var(--or)}
 .card{padding:10px 14px;border-bottom:1px solid var(--line)}
-.card.rem{border-left:5px solid var(--g)}.card.vs{border-left:5px solid #9cc7b7}
+.card.rem{border-left:5px solid var(--g)}.card.vs{border-left:5px solid var(--or)}
 .card.bad{background:var(--corl)}.card.ovr{background:var(--amb)}
-.card b{display:block}.card .lk{font-weight:600}
-details summary{cursor:pointer;font-size:14px;color:var(--mut)}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;flex-wrap:wrap}
-.seg button{border-radius:0;background:transparent;color:var(--ink)}.seg button.on{background:var(--g);color:#fff}
+.card b{display:block}.card .lk{font-weight:bold}
+details summary{cursor:pointer;font-size:13px;color:var(--mut)}
+.seg{display:inline-flex;border:1px solid var(--g);border-radius:10px;overflow:hidden;flex-wrap:wrap;background:var(--panel)}
+.seg button{border-radius:0;border:0;background:transparent;color:var(--g)}.seg button.on{background:var(--g);color:#fff}
 .tlist{display:grid;gap:10px}
 .tk{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,2fr) minmax(0,2fr) 110px 44px;gap:10px;align-items:start;border-bottom:1px solid var(--line);padding-bottom:10px}
-.tk .cbs{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:14px}
-.tk .cbs label{color:var(--ink);font-size:14px}
+.tk .cbs{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px}
+.tk .cbs label{color:var(--ink);font-size:13px}
 .kl{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
-.note{font-size:13px;color:var(--mut);margin-top:30px}
+.note{font-size:12px;color:var(--mut);margin-top:30px}
 @media(max-width:800px){.tk{grid-template-columns:1fr}}
+@media(max-width:560px){.schoollogo{width:100px;height:21px;padding:4px 7px}}
 @media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:8em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;white-space:normal;color:var(--mut)}.stack td:empty{display:none}}
-@media print{header nav,.noprint{display:none}header{background:none;color:#000;padding:0}main{padding:0}.col>h3{background:#ddd;color:#000}}
+@media print{body{background:#fff}header nav,.noprint{display:none}header{background:none;color:#000;padding:0}.streep{display:none}.schoollogo{padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}main{padding:0}.panel,.col{box-shadow:none}.col>h3{background:#ddd;color:#000}}
 </style>
 <script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
 </head>
 <body>
 <header>
-  <h1>Remediëringsplanner 3e graad</h1>
-  <p id="sub">Demoversie met verzonnen leerkrachten, klassen en leerlingen.</p>
+  <div class="balk">
+    <div class="schoollogo" role="img" aria-label="De Resonant"></div>
+    <div class="streep"></div>
+    <h1 class="titel">Remediëringsplanner 3e graad<small id="sub">Demoversie met verzonnen leerkrachten, klassen en leerlingen</small></h1>
+  </div>
   <nav id="nav">
     <a href="#leerkracht" data-tab="leerkracht">Leerkracht</a>
     <a href="#beheer" data-tab="beheer">Beheer</a>
